@@ -17,4 +17,12 @@ public class CustomerService {
     public List<Customer> retrieveAllCustomers() {
         return customerRepo.getAllCustomers();
     }
+
+    public List<Customer> retrieveAllCustomersWithLimitOffset(int limit, int offset) {
+        return customerRepo.getAllCustomersWithLimitOffset(limit, offset);
+    }
+
+    public Customer retrieveCustomerById(int id) {
+        return customerRepo.getCustomerById(id);
+    }
 }
