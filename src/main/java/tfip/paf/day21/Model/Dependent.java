@@ -2,7 +2,7 @@ package tfip.paf.day21.Model;
 
 import java.sql.Date;
 
-public class Dependent {
+public class Dependent{
     private Integer id;
     private String fullName;
     private String relationship;

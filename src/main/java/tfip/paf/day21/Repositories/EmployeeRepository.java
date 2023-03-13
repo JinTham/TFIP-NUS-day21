@@ -25,19 +25,19 @@ public class EmployeeRepository {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    String findAllSQL = "select emp.id as emp_id,first_name,last_name,salary,dep.id as dep_id,full_name as dep_name,relationship,birthdate as dep_birthdate"
+    String findAllSQL = "select emp.id as emp_id,first_name,last_name,salary,dep.id as dep_id,dep.full_name as dep_name,dep.relationship,dep.birthdate as dep_birthdate"
                         + " from employee as emp"
                         + " inner join dependent as dep"
                         + " on emp.id = dep.employee_id"
-                        + " order by emp_id";
+                        + " order by emp_id";                     
 
-    String findByIdSQL = "select emp.id as emp_id,first_name,last_name,salary,dep.id as dep_id,full_name as dep_name,relationship,birthdate as dep_birthdate"
+    String findByIdSQL = "select emp.id as emp_id,first_name,last_name,salary,dep.id as dep_id,dep.full_name as dep_name,dep.relationship,dep.birthdate as dep_birthdate"
                         + " from employee as emp"
                         + " inner join dependent as dep"
                         + " on emp.id = dep.employee_id"
-                        + " where emp_id = ?";
+                        + " where emp.id = ? ";
 
-    String insertSQL = "insert into employee (first_name, last_name, salary) values (?, ?, ?);";
+    String insertSQL = "insert into employee (first_name, last_name, salary) values (?, ?, ?)";
 
     String updateSQL = "update employee set first_name=?, last_name=?, salary=? where id=?";
 
@@ -73,7 +73,7 @@ public class EmployeeRepository {
         return updated;
     }
 
-    public int delete(Employee employee) {
+    public int delete(Integer id) {
         int deleted = 0;
         // PreparedStatementSetter pss = new PreparedStatementSetter() {
         //     @Override
@@ -82,7 +82,7 @@ public class EmployeeRepository {
         //     }
         // };
         // deleted = jdbcTemplate.update(deleteSQL, pss);
-        deleted = jdbcTemplate.update(deleteSQL,employee.getId());
+        deleted = jdbcTemplate.update(deleteSQL,id);
         return deleted;
     }
 
@@ -91,20 +91,20 @@ public class EmployeeRepository {
         employees = jdbcTemplate.query(findAllSQL, new ResultSetExtractor<List<Employee>>() {
             @Override
             public List<Employee> extractData(ResultSet rs) throws SQLException, DataAccessException {
-                List<Employee> emps = new ArrayList<>();
+                List<Employee> emps = new ArrayList<Employee>();
                 while (rs.next()) {
                     Employee employee = new Employee();
                     employee.setId(rs.getInt("emp_id"));
                     employee.setFirstName(rs.getString("first_name"));
                     employee.setLastName(rs.getString("last_name"));
                     employee.setSalary(rs.getFloat("salary"));
+                    employee.setDependents(new ArrayList<Dependent>());
 
                     Dependent dependent = new Dependent();
                     dependent.setId(rs.getInt("dep_id"));
                     dependent.setFullName(rs.getString("dep_name"));
                     dependent.setRelationship(rs.getString("relationship"));
                     dependent.setBirthDate(rs.getDate("dep_birthdate"));
-                    dependent.setEmployee(employee);
 
                     if (emps.size() == 0) { //if emps list is empty
                         employee.getDependents().add(dependent);
@@ -133,24 +133,31 @@ public class EmployeeRepository {
         return employees;
     }
 
-    public Employee findById(Integer id) {
+    public Employee findByEmployeeId(Integer id) {
         Employee employee = jdbcTemplate.query(findByIdSQL, new ResultSetExtractor<Employee>() {
             @Override
             public Employee extractData(ResultSet rs) throws SQLException, DataAccessException {
                 Employee employee = new Employee();
-                employee.setId(rs.getInt("emp_id"));
-                employee.setFirstName(rs.getString("first_name"));
-                employee.setLastName(rs.getString("last_name"));
-                employee.setSalary(rs.getFloat("salary"));
-
+                
                 while (rs.next()) {
+                    employee = new Employee();
+                    employee.setId(rs.getInt("emp_id"));
+                    employee.setFirstName(rs.getString("first_name"));
+                    employee.setLastName(rs.getString("last_name"));
+                    employee.setSalary(rs.getFloat("salary"));
+                    employee.setDependents(new ArrayList<Dependent>());
+
                     Dependent dependent = new Dependent();
                     dependent.setId(rs.getInt("dep_id"));
                     dependent.setFullName(rs.getString("dep_name"));
                     dependent.setRelationship(rs.getString("relationship"));
                     dependent.setBirthDate(rs.getDate("dep_birthdate"));
 
-                    employee.getDependents().add(dependent);
+                    if (rs.isFirst()) {
+                        employee.getDependents().add(dependent);
+                    } else {
+                        employee.getDependents().add(dependent);
+                    }
                 }
                 return employee;
             }
