@@ -27,13 +27,13 @@ public class EmployeeRepository {
 
     String findAllSQL = "select emp.id as emp_id,first_name,last_name,salary,dep.id as dep_id,dep.full_name as dep_name,dep.relationship,dep.birthdate as dep_birthdate"
                         + " from employee as emp"
-                        + " inner join dependent as dep"
+                        + " left join dependent as dep"
                         + " on emp.id = dep.employee_id"
                         + " order by emp_id";                     
 
     String findByIdSQL = "select emp.id as emp_id,first_name,last_name,salary,dep.id as dep_id,dep.full_name as dep_name,dep.relationship,dep.birthdate as dep_birthdate"
                         + " from employee as emp"
-                        + " inner join dependent as dep"
+                        + " left join dependent as dep"
                         + " on emp.id = dep.employee_id"
                         + " where emp.id = ? ";
 
